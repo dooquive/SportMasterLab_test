@@ -1,8 +1,10 @@
 select
-    final_cte."Day",
-    round(final_cte."CANCELLED_TRIPS_COUNT"/NULLIF(final_cte."ALL_TRIPS_PER_DAY", 0), 2) as "Cancellation_Rate"
+    final."Day",
+    round(final."CANCELLED_TRIPS_COUNT"/NULLIF(final."ALL_TRIPS_PER_DAY", 0), 2) as "Cancellation_Rate"
 from
     (
+
+        -- Получаем группы с датами поездок, количеством всех поездок за дату и количеством отменённых поездок на эту же дату
         select
             trips_summary.REQUEST_AT as "Day",
             trips_summary."ALL_TRIPS_PER_DAY",
@@ -11,6 +13,8 @@ from
                 else trips."CANCELLED_TRIPS_COUNT"
             end as "CANCELLED_TRIPS_COUNT"
         from
+
+            -- Считаем общие количества всех поездок с группировкой по датам
             (
                 select
                     tr_sum."REQUEST_AT",
@@ -22,7 +26,9 @@ from
             ) trips_summary
             
         left join
-        
+            
+            -- Считаем количества отменённых поездок с определёнными условиями
+            -- Группируем по дате поездки
             (
                 select 
                     tr."REQUEST_AT",
@@ -54,7 +60,7 @@ from
             
             on
                 trips_summary."REQUEST_AT" = trips."REQUEST_AT"
-    ) final_cte
+    ) final
     
 order by
-    final_cte."Day"
+    final."Day"
